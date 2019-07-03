@@ -1,0 +1,44 @@
+apply plugin: 'java-library'
+apply plugin: 'com.google.protobuf'
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.8.0'
+    }
+    plugins {
+        javalite {
+            artifact = 'com.google.protobuf:protoc-gen-javalite:3.0.0'
+        }
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.21.0"
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                remove java
+            }
+            task.plugins {
+                javalite {}
+                grpc {
+                    option 'lite'
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "io.grpc:grpc-protobuf-lite:$rootProject.ioGrpcVersion"
+    implementation "io.grpc:grpc-okhttp:$rootProject.ioGrpcVersion"
+    implementation "io.grpc:grpc-stub:$rootProject.ioGrpcVersion"
+    protobuf 'com.google.protobuf:protobuf-java:3.7.0'
+}
+
+sourceSets {
+    main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/javalite"
+    main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/grpc"
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
